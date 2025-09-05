@@ -1,7 +1,7 @@
 javascript
 // waitlist.js
 const { createClient } = require('@supabase/supabase-js');
-SUPABASE_URL = https://supabase.com/dashboard/project/dmliabsevfwrisnrsavg
+SUPABASE_URL = https://dmliabsevfwrisnrsavg.supabase.co
 SUPABASE_SERVICE_ROLE_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtbGlhYnNldmZ3cmlzbnJzYXZnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjgzMTkxNSwiZXhwIjoyMDcyNDA3OTE1fQ.5Y-alDdaTbkAxbro-O67ADQCxI17GAo0NOkWVnku3jU
 
 
@@ -56,7 +56,7 @@ module.exports = async (req, res) => {
 
     // Initialize Supabase client
     const supabase = createClient(
-      process.env.https://supabase.com/dashboard/project/dmliabsevfwrisnrsavg,
+      process.env.https://dmliabsevfwrisnrsavg.supabase.co,
       process.env.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtbGlhYnNldmZ3cmlzbnJzYXZnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjgzMTkxNSwiZXhwIjoyMDcyNDA3OTE1fQ.5Y-alDdaTbkAxbro-O67ADQCxI17GAo0NOkWVnku3jU
     );
 
