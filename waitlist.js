@@ -56,8 +56,8 @@ module.exports = async (req, res) => {
 
     // Initialize Supabase client
     const supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
+      process.env.https://supabase.com/dashboard/project/dmliabsevfwrisnrsavg,
+      process.env.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtbGlhYnNldmZ3cmlzbnJzYXZnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjgzMTkxNSwiZXhwIjoyMDcyNDA3OTE1fQ.5Y-alDdaTbkAxbro-O67ADQCxI17GAo0NOkWVnku3jU
     );
 
     // Insert data into waitlist table
