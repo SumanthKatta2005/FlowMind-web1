@@ -946,33 +946,75 @@
                 progressBar.style.width = scrollPercent + '%';
             });
             
-            // Form submission with confetti
-            const waitlistForm = document.getElementById('waitlist-form');
-            waitlistForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const button = this.querySelector('.cta-button');
-                const originalText = button.innerHTML;
-                
-                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Joining...';
-                button.disabled = true;
-                
-                // Simulate API call
-                setTimeout(() => {
-                    button.innerHTML = '<i class="fas fa-check"></i> Welcome Aboard!';
-                    button.style.background = 'linear-gradient(135deg, #10B981 0%, #34D399 100%)';
-                    
-                    // Create confetti
-                    createConfetti();
-                    
-                    // Reset after 3 seconds
-                    setTimeout(() => {
-                        button.innerHTML = originalText;
-                        button.style.background = '';
-                        button.disabled = false;
-                        this.reset();
-                    }, 3000);
-                }, 2000);
-            });
+        // Form submission with confetti - CONNECTED TO BACKEND
+const waitlistForm = document.getElementById('waitlist-form');
+waitlistForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+    const email = formData.get('email');
+    const name = formData.get('name');
+
+    const button = this.querySelector('.cta-button');
+    const originalText = button.innerHTML;
+
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Joining...';
+    button.disabled = true;
+
+    try {
+        // --- MAKE THE API CALL TO YOUR BACKEND ---
+        const response = await fetch('/api/waitlist', { // Adjust the URL if your endpoint is different
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                name: name
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Show success message and confetti
+            button.innerHTML = '<i class="fas fa-check"></i> Welcome Aboard!';
+            button.style.background = 'linear-gradient(135deg, #10B981 0%, #34D399 100%)';
+            createConfetti();
+
+            // Reset form and button after 3 seconds
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.background = '';
+                button.disabled = false;
+                this.reset();
+            }, 3000);
+        } else {
+            // Show error message
+            button.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${result.message || 'Error'}`;
+            button.style.background = 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)';
+
+            // Reset button after 3 seconds, but don't reset the form so user can see their input
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.background = '';
+                button.disabled = false;
+            }, 3000);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        // Show generic error message
+        button.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Network Error';
+        button.style.background = 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)';
+
+        // Reset button after 3 seconds
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.style.background = '';
+            button.disabled = false;
+        }, 3000);
+    }
+});
             
             // Confetti function
             function createConfetti() {
