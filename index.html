@@ -946,14 +946,15 @@
                 progressBar.style.width = scrollPercent + '%';
             });
             
-        // Form submission with confetti - SIMULATED BACKEND
+       // Form submission with confetti - CONNECTED TO SUPABASE
 const waitlistForm = document.getElementById('waitlist-form');
 waitlistForm.addEventListener('submit', async function(e) {
     e.preventDefault();
 
-    const formData = new FormData(this);
-    const email = formData.get('email');
-    const name = formData.get('name');
+    const emailInput = this.querySelector('input[type="email"]');
+    const nameInput = this.querySelector('input[type="text"]');
+    const email = emailInput.value.trim();
+    const name = nameInput ? nameInput.value.trim() : '';
 
     const button = this.querySelector('.cta-button');
     const originalText = button.innerHTML;
@@ -962,30 +963,59 @@ waitlistForm.addEventListener('submit', async function(e) {
     button.disabled = true;
 
     try {
-        // Validate email
-        if (!email || !email.includes('@')) {
+        // Validate email on client side first
+        if (!email) {
+            throw new Error('Please enter your email address');
+        }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
             throw new Error('Please enter a valid email address');
         }
 
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Make API call to your Supabase backend
+        const response = await fetch('/api/waitlist', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                name: name
+            })
+        });
 
-        // Show success message and confetti
-        button.innerHTML = '<i class="fas fa-check"></i> Welcome Aboard!';
-        button.style.background = 'linear-gradient(135deg, #10B981 0%, #34D399 100%)';
-        createConfetti();
+        const result = await response.json();
 
-        // Reset form and button after 3 seconds
-        setTimeout(() => {
-            button.innerHTML = originalText;
-            button.style.background = '';
-            button.disabled = false;
-            this.reset();
-        }, 3000);
+        if (result.success) {
+            // Show success message and confetti
+            button.innerHTML = '<i class="fas fa-check"></i> Welcome Aboard!';
+            button.style.background = 'linear-gradient(135deg, #10B981 0%, #34D399 100%)';
+            createConfetti();
+
+            // Reset form and button after 3 seconds
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.background = '';
+                button.disabled = false;
+                this.reset();
+            }, 3000);
+        } else {
+            // Show error message
+            button.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${result.message}`;
+            button.style.background = 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)';
+
+            // Reset button after 3 seconds
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.background = '';
+                button.disabled = false;
+            }, 3000);
+        }
     } catch (error) {
         console.error('Error:', error);
-        // Show error message
-        button.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${error.message || 'Something went wrong'}`;
+        // Show generic error message
+        button.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Network Error';
         button.style.background = 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)';
 
         // Reset button after 3 seconds
