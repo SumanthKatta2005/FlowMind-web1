@@ -945,8 +945,8 @@
                 const scrollPercent = (scrollTop / docHeight) * 100;
                 progressBar.style.width = scrollPercent + '%';
             });
-            
-       // Form submission with confetti - CONNECTED TO SUPABASE
+
+            // Form submission with confetti - DIRECT SUPABASE INTEGRATION
 const waitlistForm = document.getElementById('waitlist-form');
 waitlistForm.addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -973,50 +973,73 @@ waitlistForm.addEventListener('submit', async function(e) {
             throw new Error('Please enter a valid email address');
         }
 
-        // Make API call to your Supabase backend
-        const response = await fetch('/api/waitlist', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                email: email,
-                name: name
+        // Initialize Supabase client directly in frontend
+        const supabaseUrl = https://dmliabsevfwrisnrsavg.supabase.co
+        const supabaseAnonKey = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtbGlhYnNldmZ3cmlzbnJzYXZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MzE5MTUsImV4cCI6MjA3MjQwNzkxNX0.b5RF6RqVbPpZxxjSxDwWp9YqI21pq-Hukr4VIYRC-LM
+        
+        // Create Supabase client
+        const _supabase = {
+            from: (table) => ({
+                insert: async (data) => {
+                    const response = await fetch(`${supabaseUrl}/rest/v1/${table}`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': supabaseAnonKey,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=representation'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Failed to add to waitlist');
+                    }
+                    
+                    const dataResult = await response.json();
+                    return { data: dataResult, error: null };
+                }
             })
-        });
+        };
 
-        const result = await response.json();
+        // Insert data into waitlist table
+        const { data, error } = await _supabase
+            .from('waitlist')
+            .insert([
+                {
+                    email: email,
+                    name: name || null
+                }
+            ]);
 
-        if (result.success) {
-            // Show success message and confetti
-            button.innerHTML = '<i class="fas fa-check"></i> Welcome Aboard!';
-            button.style.background = 'linear-gradient(135deg, #10B981 0%, #34D399 100%)';
-            createConfetti();
-
-            // Reset form and button after 3 seconds
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                button.style.background = '';
-                button.disabled = false;
-                this.reset();
-            }, 3000);
-        } else {
-            // Show error message
-            button.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${result.message}`;
-            button.style.background = 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)';
-
-            // Reset button after 3 seconds
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                button.style.background = '';
-                button.disabled = false;
-            }, 3000);
+        if (error) {
+            throw new Error(error.message);
         }
+
+        // Show success message and confetti
+        button.innerHTML = '<i class="fas fa-check"></i> Welcome Aboard!';
+        button.style.background = 'linear-gradient(135deg, #10B981 0%, #34D399 100%)';
+        createConfetti();
+
+        // Reset form and button after 3 seconds
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.style.background = '';
+            button.disabled = false;
+            this.reset();
+        }, 3000);
     } catch (error) {
         console.error('Error:', error);
-        // Show generic error message
-        button.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Network Error';
-        button.style.background = 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)';
+        
+        // Handle duplicate email error
+        if (error.message && error.message.includes('duplicate key')) {
+            button.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Already Registered';
+            button.style.background = 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)';
+        } else {
+            // Show generic error message
+            button.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Network Error';
+            button.style.background = 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)';
+        }
 
         // Reset button after 3 seconds
         setTimeout(() => {
@@ -1026,6 +1049,7 @@ waitlistForm.addEventListener('submit', async function(e) {
         }, 3000);
     }
 });
+       
             
             // Confetti function
             function createConfetti() {
